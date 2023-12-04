@@ -12,18 +12,26 @@ if (file_exists($filename)) {
 
     if (!empty($searchString)) {
         // Function to search for a string in nested arrays
-        function recursive_array_search($needle, $haystack) {
-            foreach ($haystack as $key => $value) {
-                $currentKey = $key;
-                if ($needle === $value || (is_array($value) && recursive_array_search($needle, $value) !== false)) {
-                    return $currentKey;
-                }
+        // Function to search for a string in nested arrays with partial matching
+function recursive_array_search_partial($needle, $haystack) {
+    foreach ($haystack as $key => $value) {
+        if (is_array($value)) {
+            $result = recursive_array_search_partial($needle, $value);
+            if ($result !== false) {
+                return $key;
             }
-            return false;
+        } else {
+            // Perform a case-insensitive partial match
+            if (stripos($value, $needle) !== false) {
+                return $key;
+            }
         }
+    }
+    return false;
+}
 
-        // Perform the search
-        $searchResultKey = recursive_array_search($searchString, $storedData);
+// Perform the search with partial matching
+$searchResultKey = recursive_array_search_partial($searchString, $storedData);
         if ($searchResultKey !== false) {
             $searchResult = array($searchResultKey => $storedData[$searchResultKey]);
         } else {
